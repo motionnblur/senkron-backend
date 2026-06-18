@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.motionnblur.senkron_backend.config.AppProperties;
 import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.repository.UserRepository;
+import com.motionnblur.senkron_backend.service.AuthService;
+import com.motionnblur.senkron_backend.service.GoogleUserProfile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,17 +22,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
     private final CookieUtils cookieUtils;
-    private final UserRepository userRepository;
+    private final AuthService authService;
     private final AppProperties appProperties;
 
     public OAuth2LoginSuccessHandler(
             JwtService jwtService,
             CookieUtils cookieUtils,
-            UserRepository userRepository,
+            AuthService authService,
             AppProperties appProperties) {
         this.jwtService = jwtService;
         this.cookieUtils = cookieUtils;
-        this.userRepository = userRepository;
+        this.authService = authService;
         this.appProperties = appProperties;
     }
 
@@ -42,10 +43,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             Authentication authentication) throws IOException {
 
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String email = oauthUser.getAttribute("email");
-
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("OAuth user not found after login: " + email));
+        UserEntity user = authService.findOrCreateGoogleUser(GoogleUserProfile.from(oauthUser));
 
         String token = jwtService.generateToken(user.getId(), user.getEmail());
         response.addHeader(
