@@ -26,8 +26,11 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = true)
     private String password;
+
+    @Column(name = "google_id", unique = true)
+    private String googleId;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

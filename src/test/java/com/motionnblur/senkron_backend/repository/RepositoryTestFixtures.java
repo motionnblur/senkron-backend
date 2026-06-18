@@ -30,6 +30,18 @@ final class RepositoryTestFixtures {
         return user;
     }
 
+    static UserEntity oauthUser(String googleId, String email) {
+        UserEntity user = new UserEntity();
+        user.setGoogleId(googleId);
+        user.setName("Ada");
+        user.setLastName("Lovelace");
+        user.setDisplayName("Ada Lovelace");
+        user.setEmail(email);
+        user.setPassword(null);
+        user.setCreatedAt(BASE_TIME);
+        return user;
+    }
+
     static ChannelEntity channel(UserEntity createdBy, ChannelType type, String name) {
         ChannelEntity channel = new ChannelEntity();
         channel.setName(name);
