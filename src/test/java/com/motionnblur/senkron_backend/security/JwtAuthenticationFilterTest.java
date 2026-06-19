@@ -18,6 +18,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.motionnblur.senkron_backend.auth.JwtAuthenticationFilter;
+import com.motionnblur.senkron_backend.auth.JwtService;
+import com.motionnblur.senkron_backend.auth.JwtUserPrincipal;
+
 import jakarta.servlet.http.Cookie;
 
 @ExtendWith(MockitoExtension.class)

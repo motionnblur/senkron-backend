@@ -16,9 +16,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.motionnblur.senkron_backend.security.CustomOAuth2UserService;
-import com.motionnblur.senkron_backend.security.JwtAuthenticationFilter;
-import com.motionnblur.senkron_backend.security.OAuth2LoginSuccessHandler;
+import com.motionnblur.senkron_backend.auth.CustomOAuth2UserService;
+import com.motionnblur.senkron_backend.auth.JwtAuthenticationFilter;
+import com.motionnblur.senkron_backend.auth.OAuth2LoginSuccessHandler;
 
 @Configuration
 @EnableWebSecurity

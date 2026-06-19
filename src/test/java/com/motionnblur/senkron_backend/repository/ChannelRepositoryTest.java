@@ -13,9 +13,11 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
 
-import com.motionnblur.senkron_backend.entity.ChannelEntity;
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.enums.ChannelType;
+import com.motionnblur.senkron_backend.channel.ChannelEntity;
+import com.motionnblur.senkron_backend.channel.ChannelRepository;
+import com.motionnblur.senkron_backend.channel.ChannelType;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)

@@ -1,13 +1,11 @@
-package com.motionnblur.senkron_backend.repository;
+package com.motionnblur.senkron_backend.channel;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.motionnblur.senkron_backend.entity.ChannelEntity;
-import com.motionnblur.senkron_backend.entity.ChannelMemberEntity;
-import com.motionnblur.senkron_backend.entity.UserEntity;
+import com.motionnblur.senkron_backend.user.UserEntity;
 
 public interface ChannelMemberRepository extends JpaRepository<ChannelMemberEntity, Long> {
 

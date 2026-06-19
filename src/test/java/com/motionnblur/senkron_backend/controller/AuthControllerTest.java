@@ -18,11 +18,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.repository.UserRepository;
-import com.motionnblur.senkron_backend.security.CookieUtils;
-import com.motionnblur.senkron_backend.security.JwtService;
-import com.motionnblur.senkron_backend.service.UserNotFoundException;
+import com.motionnblur.senkron_backend.auth.CookieUtils;
+import com.motionnblur.senkron_backend.auth.JwtService;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserNotFoundException;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 

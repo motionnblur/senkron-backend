@@ -14,10 +14,13 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.motionnblur.senkron_backend.entity.ChannelEntity;
-import com.motionnblur.senkron_backend.entity.ChannelMemberEntity;
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.enums.ChannelType;
+import com.motionnblur.senkron_backend.channel.ChannelEntity;
+import com.motionnblur.senkron_backend.channel.ChannelMemberEntity;
+import com.motionnblur.senkron_backend.channel.ChannelMemberRepository;
+import com.motionnblur.senkron_backend.channel.ChannelRepository;
+import com.motionnblur.senkron_backend.channel.ChannelType;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)

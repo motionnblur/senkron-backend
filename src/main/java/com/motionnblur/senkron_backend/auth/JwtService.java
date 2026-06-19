@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.security;
+package com.motionnblur.senkron_backend.auth;
 
 import java.util.Date;
 

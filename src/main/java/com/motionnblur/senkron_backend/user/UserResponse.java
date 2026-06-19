@@ -1,8 +1,6 @@
-package com.motionnblur.senkron_backend.dto.response;
+package com.motionnblur.senkron_backend.user;
 
 import java.time.LocalDateTime;
-
-import com.motionnblur.senkron_backend.entity.UserEntity;
 
 public record UserResponse(
         Long id,

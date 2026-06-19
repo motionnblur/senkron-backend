@@ -7,6 +7,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 
+import com.motionnblur.senkron_backend.auth.CookieUtils;
 import com.motionnblur.senkron_backend.config.AppProperties;
 
 class CookieUtilsTest {

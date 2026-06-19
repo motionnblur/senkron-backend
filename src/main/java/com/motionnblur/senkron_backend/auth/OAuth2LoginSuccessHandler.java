@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.security;
+package com.motionnblur.senkron_backend.auth;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,9 +9,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import com.motionnblur.senkron_backend.config.AppProperties;
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.service.AuthService;
-import com.motionnblur.senkron_backend.service.GoogleUserProfile;
+import com.motionnblur.senkron_backend.user.UserEntity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

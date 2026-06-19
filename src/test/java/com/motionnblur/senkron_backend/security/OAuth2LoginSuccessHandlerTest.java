@@ -21,10 +21,13 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import com.motionnblur.senkron_backend.auth.AuthService;
+import com.motionnblur.senkron_backend.auth.CookieUtils;
+import com.motionnblur.senkron_backend.auth.GoogleUserProfile;
+import com.motionnblur.senkron_backend.auth.JwtService;
+import com.motionnblur.senkron_backend.auth.OAuth2LoginSuccessHandler;
 import com.motionnblur.senkron_backend.config.AppProperties;
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.service.AuthService;
-import com.motionnblur.senkron_backend.service.GoogleUserProfile;
+import com.motionnblur.senkron_backend.user.UserEntity;
 
 @ExtendWith(MockitoExtension.class)
 class OAuth2LoginSuccessHandlerTest {

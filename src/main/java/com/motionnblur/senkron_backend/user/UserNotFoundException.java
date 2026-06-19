@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.service;
+package com.motionnblur.senkron_backend.user;
 
 public class UserNotFoundException extends RuntimeException {
 

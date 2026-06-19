@@ -9,6 +9,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import com.motionnblur.senkron_backend.auth.GoogleUserProfile;
+
 class GoogleUserProfileTest {
 
     @Test

@@ -9,6 +9,8 @@ import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.motionnblur.senkron_backend.auth.JwtService;
+import com.motionnblur.senkron_backend.auth.JwtUserPrincipal;
 import com.motionnblur.senkron_backend.config.AppProperties;
 
 import io.jsonwebtoken.Jwts;

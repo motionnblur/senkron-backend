@@ -12,7 +12,8 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.motionnblur.senkron_backend.entity.UserEntity;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)

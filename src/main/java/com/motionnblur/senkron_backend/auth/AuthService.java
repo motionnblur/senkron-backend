@@ -1,12 +1,13 @@
-package com.motionnblur.senkron_backend.service;
+package com.motionnblur.senkron_backend.auth;
 
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.repository.UserRepository;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserNotFoundException;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 @Service
 public class AuthService {

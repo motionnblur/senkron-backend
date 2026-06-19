@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.repository;
+package com.motionnblur.senkron_backend.message;
 
 import java.util.List;
 
@@ -6,9 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.motionnblur.senkron_backend.entity.ChannelEntity;
-import com.motionnblur.senkron_backend.entity.MessageEntity;
-import com.motionnblur.senkron_backend.entity.UserEntity;
+import com.motionnblur.senkron_backend.channel.ChannelEntity;
+import com.motionnblur.senkron_backend.user.UserEntity;
 
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 

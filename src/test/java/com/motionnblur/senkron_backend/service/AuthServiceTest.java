@@ -16,8 +16,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.repository.UserRepository;
+import com.motionnblur.senkron_backend.auth.AuthService;
+import com.motionnblur.senkron_backend.auth.GoogleUserProfile;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserNotFoundException;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {

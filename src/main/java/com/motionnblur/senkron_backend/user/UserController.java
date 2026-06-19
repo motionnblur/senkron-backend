@@ -1,13 +1,11 @@
-package com.motionnblur.senkron_backend.controller;
+package com.motionnblur.senkron_backend.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.motionnblur.senkron_backend.dto.response.UserResponse;
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.security.JwtUserPrincipal;
-import com.motionnblur.senkron_backend.service.AuthService;
+import com.motionnblur.senkron_backend.auth.AuthService;
+import com.motionnblur.senkron_backend.auth.JwtUserPrincipal;
 
 @RestController
 @RequestMapping("/user")

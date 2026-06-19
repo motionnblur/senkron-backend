@@ -1,10 +1,8 @@
-package com.motionnblur.senkron_backend.repository;
+package com.motionnblur.senkron_backend.user;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.motionnblur.senkron_backend.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 

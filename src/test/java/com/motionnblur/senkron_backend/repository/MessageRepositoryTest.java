@@ -16,10 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import com.motionnblur.senkron_backend.entity.ChannelEntity;
-import com.motionnblur.senkron_backend.entity.MessageEntity;
-import com.motionnblur.senkron_backend.entity.UserEntity;
-import com.motionnblur.senkron_backend.enums.ChannelType;
+import com.motionnblur.senkron_backend.channel.ChannelEntity;
+import com.motionnblur.senkron_backend.channel.ChannelRepository;
+import com.motionnblur.senkron_backend.channel.ChannelType;
+import com.motionnblur.senkron_backend.message.MessageEntity;
+import com.motionnblur.senkron_backend.message.MessageRepository;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)

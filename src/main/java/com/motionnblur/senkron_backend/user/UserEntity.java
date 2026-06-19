@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.entity;
+package com.motionnblur.senkron_backend.user;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;

@@ -1,10 +1,10 @@
-package com.motionnblur.senkron_backend.entity;
+package com.motionnblur.senkron_backend.channel;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-import com.motionnblur.senkron_backend.enums.ChannelType;
+import com.motionnblur.senkron_backend.user.UserEntity;
 
 @Entity
 @Data

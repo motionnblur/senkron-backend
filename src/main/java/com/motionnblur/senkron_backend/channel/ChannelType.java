@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.enums;
+package com.motionnblur.senkron_backend.channel;
 
 public enum ChannelType {
     PUBLIC,

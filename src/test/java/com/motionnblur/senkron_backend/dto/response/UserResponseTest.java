@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import com.motionnblur.senkron_backend.entity.UserEntity;
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserResponse;
 
 class UserResponseTest {
 
