@@ -30,4 +30,21 @@ class GoogleUserProfileTest {
         assertThat(profile.familyName()).isEqualTo("Lovelace");
         assertThat(profile.fullName()).isEqualTo("Ada Lovelace");
     }
+
+    @Test
+    void from_yieldsNullFieldsWhenAttributesMissing() {
+        OAuth2User oauthUser = mock(OAuth2User.class);
+        when(oauthUser.getAttributes()).thenReturn(Map.of(
+                "sub", "google-123",
+                "email", "ada@example.com"
+        ));
+
+        GoogleUserProfile profile = GoogleUserProfile.from(oauthUser);
+
+        assertThat(profile.googleId()).isEqualTo("google-123");
+        assertThat(profile.email()).isEqualTo("ada@example.com");
+        assertThat(profile.givenName()).isNull();
+        assertThat(profile.familyName()).isNull();
+        assertThat(profile.fullName()).isNull();
+    }
 }

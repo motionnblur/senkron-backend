@@ -57,8 +57,40 @@ class AuthServiceTest {
 
         UserEntity result = authService.findOrCreateGoogleUser(profile);
 
+        assertThat(result).isSameAs(existing);
         assertThat(result.getGoogleId()).isEqualTo("google-456");
+        verify(userRepository).findByEmail("ada@example.com");
         verify(userRepository).save(existing);
+    }
+
+    @Test
+    void findOrCreateGoogleUser_usesDefaultsWhenNameAttributesNull() {
+        GoogleUserProfile profile = new GoogleUserProfile("google-789", "new@example.com", null, null, null);
+
+        when(userRepository.findByGoogleId("google-789")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserEntity result = authService.findOrCreateGoogleUser(profile);
+
+        assertThat(result.getName()).isEmpty();
+        assertThat(result.getLastName()).isEmpty();
+        assertThat(result.getDisplayName()).isEqualTo("new@example.com");
+    }
+
+    @Test
+    void findOrCreateGoogleUser_usesDefaultsWhenNameAttributesBlank() {
+        GoogleUserProfile profile = new GoogleUserProfile("google-789", "new@example.com", "  ", "\t", "   ");
+
+        when(userRepository.findByGoogleId("google-789")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserEntity result = authService.findOrCreateGoogleUser(profile);
+
+        assertThat(result.getName()).isEmpty();
+        assertThat(result.getLastName()).isEmpty();
+        assertThat(result.getDisplayName()).isEqualTo("new@example.com");
     }
 
     @Test

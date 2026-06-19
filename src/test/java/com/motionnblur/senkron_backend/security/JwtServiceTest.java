@@ -2,24 +2,36 @@ package com.motionnblur.senkron_backend.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.motionnblur.senkron_backend.config.AppProperties;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 class JwtServiceTest {
+
+    private static final String SECRET = "test-jwt-secret-key-min-32-chars!!";
 
     private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
-        AppProperties properties = new AppProperties(
-                new AppProperties.Jwt("test-jwt-secret-key-min-32-chars!!", 168),
+        jwtService = new JwtService(propertiesWithExpiration(168));
+    }
+
+    private AppProperties propertiesWithExpiration(int expirationHours) {
+        return new AppProperties(
+                new AppProperties.Jwt(SECRET, expirationHours),
                 new AppProperties.Cookie(false, "Lax"),
                 new AppProperties.OAuth2("http://localhost:3000/auth/callback"),
                 new AppProperties.Cors("http://localhost:3000")
         );
-        jwtService = new JwtService(properties);
     }
 
     @Test
@@ -44,6 +56,29 @@ class JwtServiceTest {
         String tampered = token.substring(0, token.length() - 1) + "x";
 
         assertThat(jwtService.parseToken(tampered)).isNull();
+    }
+
+    @Test
+    void parseToken_returnsNullForExpiredToken() {
+        JwtService expiringService = new JwtService(propertiesWithExpiration(-1));
+        String token = expiringService.generateToken(42L, "ada@example.com");
+
+        assertThat(expiringService.parseToken(token)).isNull();
+    }
+
+    @Test
+    void parseToken_returnsNullWhenSubjectNotNumeric() {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
+        Date now = new Date();
+        String token = Jwts.builder()
+                .subject("not-a-number")
+                .claim("email", "ada@example.com")
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + 3_600_000L))
+                .signWith(key)
+                .compact();
+
+        assertThat(jwtService.parseToken(token)).isNull();
     }
 
 }

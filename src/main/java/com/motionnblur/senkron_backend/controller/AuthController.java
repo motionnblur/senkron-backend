@@ -27,8 +27,9 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public UserResponse me(@AuthenticationPrincipal JwtUserPrincipal principal) {
-        return UserResponse.from(authService.getUserById(principal.userId()));
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal JwtUserPrincipal principal) {
+        UserResponse response = UserResponse.from(authService.getUserById(principal.userId()));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")

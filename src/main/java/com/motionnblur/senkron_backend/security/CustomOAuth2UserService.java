@@ -20,10 +20,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauthUser = super.loadUser(userRequest);
+        OAuth2User oauthUser = fetchOAuth2User(userRequest);
 
         authService.findOrCreateGoogleUser(GoogleUserProfile.from(oauthUser));
         return oauthUser;
+    }
+
+    protected OAuth2User fetchOAuth2User(OAuth2UserRequest userRequest) {
+        return super.loadUser(userRequest);
     }
 
 }
