@@ -95,4 +95,26 @@ class UserRepositoryTest {
         }
     }
 
+    @Nested
+    @DisplayName("findByGoogleId")
+    class FindByGoogleId {
+
+        @Test
+        void returnsUserWhenGoogleIdExists() {
+            userRepository.deleteAllInBatch();
+            UserEntity user = userRepository.saveAndFlush(RepositoryTestFixtures.oauthUser("google-abc", "ada@example.com"));
+            
+            assertThat(userRepository.findByGoogleId("google-abc"))
+                    .isPresent()
+                    .get()
+                    .extracting(UserEntity::getId, UserEntity::getGoogleId)
+                    .containsExactly(user.getId(), "google-abc");
+        }
+
+        @Test
+        void returnsEmptyWhenGoogleIdDoesNotExist() {
+            assertThat(userRepository.findByGoogleId("missing-id")).isEmpty();
+        }
+    }
+
 }

@@ -114,4 +114,25 @@ class AuthServiceTest {
         return user;
     }
 
+    @Test
+    void getUserById_returnsUserWhenFound() {
+        UserEntity existing = googleUser(42L, "google-123", "ada@example.com");
+        when(userRepository.findById(42L)).thenReturn(Optional.of(existing));
+
+        UserEntity result = authService.getUserById(42L);
+
+        assertThat(result).isSameAs(existing);
+    }
+
+    @Test
+    void getUserById_throwsUserNotFoundExceptionWhenMissing() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        UserNotFoundException ex = org.junit.jupiter.api.Assertions.assertThrows(
+                UserNotFoundException.class,
+                () -> authService.getUserById(99L));
+        
+        assertThat(ex.getMessage()).contains("99");
+    }
+
 }
