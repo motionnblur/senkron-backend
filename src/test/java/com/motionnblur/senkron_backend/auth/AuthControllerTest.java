@@ -1,6 +1,5 @@
 package com.motionnblur.senkron_backend.auth;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.motionnblur.senkron_backend.user.UserEntity;
-import com.motionnblur.senkron_backend.user.UserNotFoundException;
 import com.motionnblur.senkron_backend.user.UserRepository;
 
 import jakarta.servlet.http.Cookie;
@@ -64,11 +62,14 @@ class AuthControllerTest {
     }
 
     @Test
-    void me_failsWhenAuthenticatedUserNoLongerExists() {
+    void me_failsWhenAuthenticatedUserNoLongerExists() throws Exception {
+        Long deletedUserId = user.getId();
         userRepository.deleteAll();
 
-        assertThatThrownBy(() -> mockMvc.perform(get("/auth/me").cookie(accessTokenCookie)))
-                .hasRootCauseInstanceOf(UserNotFoundException.class);
+        mockMvc.perform(get("/auth/me").cookie(accessTokenCookie))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value("User not found: " + deletedUserId));
     }
 
     @Test

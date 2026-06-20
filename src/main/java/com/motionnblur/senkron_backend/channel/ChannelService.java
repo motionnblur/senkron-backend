@@ -52,6 +52,54 @@ public class ChannelService {
         return saved;
     }
 
+    @Transactional
+    public void joinChannel(Long userId, Long channelId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        ChannelEntity channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelNotFoundException(channelId));
+
+        if (channel.getType() != ChannelType.PUBLIC) {
+            throw new IllegalStateException("Only public channels can be joined directly");
+        }
+        if (channelMemberRepository.existsByUserIdAndChannelId(userId, channelId)) {
+            return; // idempotent 204
+        }
+
+        persistMembership(user, channel);
+    }
+
+    @Transactional
+    public void addMember(Long inviterId, Long channelId, Long targetUserId) {
+        ChannelEntity channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelNotFoundException(channelId));
+
+        if (channel.getType() != ChannelType.PRIVATE) {
+            throw new IllegalStateException("Members can only be added to private channels");
+        }
+        if (!channelMemberRepository.existsByUserIdAndChannelId(inviterId, channelId)) {
+            throw new IllegalStateException("Only channel members can add other members");
+        }
+
+        UserEntity targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UserNotFoundException(targetUserId));
+
+        persistMembership(targetUser, channel);
+    }
+
+    private void persistMembership(UserEntity user, ChannelEntity channel) {
+        if (channelMemberRepository.existsByUserIdAndChannelId(user.getId(), channel.getId())) {
+            return;
+        }
+
+        ChannelMemberEntity membership = new ChannelMemberEntity();
+        membership.setUser(user);
+        membership.setChannel(channel);
+        membership.setJoinedAt(LocalDateTime.now());
+
+        channelMemberRepository.save(membership);
+    }
+
     private void validateRequest(CreateChannelRequest request) {
         if (request.name() == null || request.name().isBlank()) {
             throw new IllegalArgumentException("Channel name must not be blank");
@@ -65,6 +113,19 @@ public class ChannelService {
         if (request.type() == ChannelType.DM) {
             throw new IllegalArgumentException("DM channels cannot be created via this endpoint");
         }
+    }
+
+    @Transactional
+    public void leaveChannel(Long userId, Long channelId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        ChannelEntity channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelNotFoundException(channelId));
+
+        ChannelMemberEntity membership = channelMemberRepository.findByUserAndChannel(user, channel)
+                .orElseThrow(() -> new ChannelMemberNotFoundException(userId, channelId));
+
+        channelMemberRepository.delete(membership);
     }
 
 }
