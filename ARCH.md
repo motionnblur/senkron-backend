@@ -79,11 +79,15 @@ com.motionnblur.senkron_backend
 │   └── UserNotFoundException.java     # thrown by AuthService.getUserById
 │
 ├── channel/                            # Channel domain
+│   ├── ChannelController.java         # REST: POST /channels
+│   ├── ChannelService.java            # createChannel (@Transactional)
 │   ├── ChannelEntity.java             # -> table "channels"  (createdBy -> UserEntity)
 │   ├── ChannelMemberEntity.java       # -> table "channel_members" (unique user+channel)
 │   ├── ChannelRepository.java
 │   ├── ChannelMemberRepository.java
-│   └── ChannelType.java               # enum: PUBLIC, PRIVATE, DM
+│   ├── ChannelType.java               # enum: PUBLIC, PRIVATE, DM
+│   ├── CreateChannelRequest.java      # request DTO (record)
+│   └── ChannelResponse.java           # response DTO (record) + from(entity) mapper
 │
 ├── message/                            # Message domain
 │   ├── MessageEntity.java             # -> table "messages" (user + nullable channel)
@@ -170,14 +174,26 @@ Notes:
 |--------|----------------|------|----------------------------------------------|
 | GET    | `/auth/me`     | Yes  | Returns the current user as `UserResponse`.  |
 | POST   | `/auth/logout` | Yes* | Clears the `access_token` cookie.            |
+| POST   | `/channels`    | Yes* | Creates a PUBLIC or PRIVATE channel; creator is added as the first member. Returns `ChannelResponse` (`201`). |
 | (auto) | `/oauth2/**`, `/login/**` | No | Spring Security OAuth2 login endpoints. |
 | (auto) | `/swagger-ui.html`, `/v3/api-docs/**` | No | OpenAPI / Swagger UI. |
 
-\* logout requires a valid CSRF token (cookie-based) like other state-changing requests.
+\* state-changing requests require a valid CSRF token (cookie-based), including logout and `POST /channels`.
 
-> The `channel` and `message` features currently have **persistence only**
-> (entities + repositories). Their services and controllers are not implemented
-> yet — this is the main area of upcoming work.
+### 6.1 Channel creation flow (`POST /channels`)
+
+1. `ChannelController` reads `@AuthenticationPrincipal JwtUserPrincipal` for the creator's `userId`.
+2. `ChannelService.createChannel(userId, request)` runs in a single `@Transactional` boundary:
+   - loads `UserEntity` (throws `UserNotFoundException` if missing),
+   - validates request (`name`/`description` not blank, `type` not null, `type != DM`),
+   - saves `ChannelEntity`,
+   - saves `ChannelMemberEntity` for the creator.
+3. Controller maps the saved entity to `ChannelResponse` and returns `201 Created`.
+
+Request body (`CreateChannelRequest`): `name`, `description`, `type` (`PUBLIC` or `PRIVATE`).
+
+> The `message` feature still has **persistence only** (entity + repository).
+> Channel listing, membership management, and message APIs are the main upcoming work.
 
 ---
 
@@ -203,18 +219,18 @@ kept out of version control (see `.gitignore`).
 
 ## 8. Testing strategy
 
-Tests mirror the main package structure (feature-first) and total **71 tests**,
+Tests mirror the main package structure (feature-first) and total **76 tests**,
 in three styles:
 
 - **Unit (Mockito):** pure logic, no Spring context — e.g. `AuthServiceTest`,
-  `JwtServiceTest`, `CookieUtilsTest`, `JwtAuthenticationFilterTest`,
-  `CustomOAuth2UserServiceTest`, `OAuth2LoginSuccessHandlerTest`,
-  `GoogleUserProfileTest`, `UserResponseTest`.
+  `ChannelServiceTest`, `JwtServiceTest`, `CookieUtilsTest`,
+  `JwtAuthenticationFilterTest`, `CustomOAuth2UserServiceTest`,
+  `OAuth2LoginSuccessHandlerTest`, `GoogleUserProfileTest`, `UserResponseTest`.
 - **Persistence slice (`@DataJpaTest` + H2):** repository query methods and
   constraints — `UserRepositoryTest`, `ChannelRepositoryTest`,
   `ChannelMemberRepositoryTest`, `MessageRepositoryTest`.
-- **Integration (`@SpringBootTest` + MockMvc):** end-to-end auth flow —
-  `AuthControllerTest`.
+- **Integration (`@SpringBootTest` + MockMvc):** end-to-end HTTP flows —
+  `AuthControllerTest`, `ChannelControllerTest`.
 
 Shared test data builders live in `support/RepositoryTestFixtures` (a `public`
 helper usable across feature test packages).
@@ -224,7 +240,7 @@ Test layout:
 src/test/java/com/motionnblur/senkron_backend/
 ├── auth/        # unit + integration tests for the auth feature
 ├── user/        # UserRepositoryTest, UserResponseTest
-├── channel/     # ChannelRepositoryTest, ChannelMemberRepositoryTest
+├── channel/     # ChannelServiceTest, ChannelControllerTest, repository tests
 ├── message/     # MessageRepositoryTest
 ├── support/     # RepositoryTestFixtures (shared)
 └── SenkronBackendApplicationTests.java  # context loads
@@ -254,11 +270,12 @@ Run tests: `./mvnw test` · Compile only: `./mvnw clean test-compile`
 
 These are intentional and not yet implemented:
 
-- **Channel/Message business layer:** no services or controllers yet (only persistence).
+- **Channel APIs beyond creation:** list channels, join/leave, DM creation, membership authorization.
+- **Message business layer:** no service or controller yet (persistence only).
 - **Global exception handling:** no `@RestControllerAdvice`; `UserNotFoundException`
-  is thrown but there is no central HTTP error mapping (e.g. → 404).
+  and `IllegalArgumentException` are thrown but there is no central HTTP error mapping (e.g. → 404/400).
+- **Workspace model:** channels are not scoped to a team/workspace yet.
 - **Refresh tokens:** only a single access-token JWT cookie exists today.
 - **Real-time messaging:** no WebSocket/STOMP transport yet.
 - **Module boundary enforcement:** feature packages are not yet sealed
   (everything is `public`).
-```
