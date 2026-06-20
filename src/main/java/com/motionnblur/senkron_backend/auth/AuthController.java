@@ -1,9 +1,14 @@
 package com.motionnblur.senkron_backend.auth;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.user.UserResponse;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -12,11 +17,20 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AuthController {
 
     private final CookieUtils cookieUtils;
+    private final AuthService authService;
 
-    public AuthController(CookieUtils cookieUtils) {
+    public AuthController(CookieUtils cookieUtils, AuthService authService) {
         this.cookieUtils = cookieUtils;
+        this.authService = authService;
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal JwtUserPrincipal principal) {
+        UserEntity user = authService.getUserById(principal.userId());
+        UserResponse response = UserResponse.from(user);
+
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
