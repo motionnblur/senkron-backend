@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.repository;
+package com.motionnblur.senkron_backend.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,8 +19,7 @@ import org.springframework.data.domain.Sort;
 import com.motionnblur.senkron_backend.channel.ChannelEntity;
 import com.motionnblur.senkron_backend.channel.ChannelRepository;
 import com.motionnblur.senkron_backend.channel.ChannelType;
-import com.motionnblur.senkron_backend.message.MessageEntity;
-import com.motionnblur.senkron_backend.message.MessageRepository;
+import com.motionnblur.senkron_backend.support.RepositoryTestFixtures;
 import com.motionnblur.senkron_backend.user.UserEntity;
 import com.motionnblur.senkron_backend.user.UserRepository;
 

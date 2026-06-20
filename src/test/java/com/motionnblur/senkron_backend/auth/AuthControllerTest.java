@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.controller;
+package com.motionnblur.senkron_backend.auth;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -18,8 +18,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.motionnblur.senkron_backend.auth.CookieUtils;
-import com.motionnblur.senkron_backend.auth.JwtService;
 import com.motionnblur.senkron_backend.user.UserEntity;
 import com.motionnblur.senkron_backend.user.UserNotFoundException;
 import com.motionnblur.senkron_backend.user.UserRepository;

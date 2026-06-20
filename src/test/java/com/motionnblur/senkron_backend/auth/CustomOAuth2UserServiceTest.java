@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.security;
+package com.motionnblur.senkron_backend.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,9 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.motionnblur.senkron_backend.auth.AuthService;
-import com.motionnblur.senkron_backend.auth.CustomOAuth2UserService;
-import com.motionnblur.senkron_backend.auth.GoogleUserProfile;
 import com.motionnblur.senkron_backend.user.UserEntity;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.security;
+package com.motionnblur.senkron_backend.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,11 +21,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.motionnblur.senkron_backend.auth.AuthService;
-import com.motionnblur.senkron_backend.auth.CookieUtils;
-import com.motionnblur.senkron_backend.auth.GoogleUserProfile;
-import com.motionnblur.senkron_backend.auth.JwtService;
-import com.motionnblur.senkron_backend.auth.OAuth2LoginSuccessHandler;
 import com.motionnblur.senkron_backend.config.AppProperties;
 import com.motionnblur.senkron_backend.user.UserEntity;
 

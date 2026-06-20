@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.service;
+package com.motionnblur.senkron_backend.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -8,8 +8,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-
-import com.motionnblur.senkron_backend.auth.GoogleUserProfile;
 
 class GoogleUserProfileTest {
 

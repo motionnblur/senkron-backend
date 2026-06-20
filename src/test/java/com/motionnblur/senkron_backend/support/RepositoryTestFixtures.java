@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.repository;
+package com.motionnblur.senkron_backend.support;
 
 import java.time.LocalDateTime;
 
@@ -8,18 +8,18 @@ import com.motionnblur.senkron_backend.channel.ChannelType;
 import com.motionnblur.senkron_backend.message.MessageEntity;
 import com.motionnblur.senkron_backend.user.UserEntity;
 
-final class RepositoryTestFixtures {
+public final class RepositoryTestFixtures {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2026, 1, 15, 10, 0);
 
     private RepositoryTestFixtures() {
     }
 
-    static UserEntity user(String email) {
+    public static UserEntity user(String email) {
         return user("Ada", "Lovelace", "ada", email, "password");
     }
 
-    static UserEntity user(String name, String lastName, String displayName, String email, String password) {
+    public static UserEntity user(String name, String lastName, String displayName, String email, String password) {
         UserEntity user = new UserEntity();
         user.setName(name);
         user.setLastName(lastName);
@@ -30,7 +30,7 @@ final class RepositoryTestFixtures {
         return user;
     }
 
-    static UserEntity oauthUser(String googleId, String email) {
+    public static UserEntity oauthUser(String googleId, String email) {
         UserEntity user = new UserEntity();
         user.setGoogleId(googleId);
         user.setName("Ada");
@@ -42,7 +42,7 @@ final class RepositoryTestFixtures {
         return user;
     }
 
-    static ChannelEntity channel(UserEntity createdBy, ChannelType type, String name) {
+    public static ChannelEntity channel(UserEntity createdBy, ChannelType type, String name) {
         ChannelEntity channel = new ChannelEntity();
         channel.setName(name);
         channel.setDescription(name + " description");
@@ -52,11 +52,11 @@ final class RepositoryTestFixtures {
         return channel;
     }
 
-    static ChannelMemberEntity membership(UserEntity user, ChannelEntity channel) {
+    public static ChannelMemberEntity membership(UserEntity user, ChannelEntity channel) {
         return membership(user, channel, BASE_TIME);
     }
 
-    static ChannelMemberEntity membership(UserEntity user, ChannelEntity channel, LocalDateTime joinedAt) {
+    public static ChannelMemberEntity membership(UserEntity user, ChannelEntity channel, LocalDateTime joinedAt) {
         ChannelMemberEntity membership = new ChannelMemberEntity();
         membership.setUser(user);
         membership.setChannel(channel);
@@ -64,7 +64,7 @@ final class RepositoryTestFixtures {
         return membership;
     }
 
-    static MessageEntity message(UserEntity user, ChannelEntity channel, String content, LocalDateTime createdAt) {
+    public static MessageEntity message(UserEntity user, ChannelEntity channel, String content, LocalDateTime createdAt) {
         MessageEntity message = new MessageEntity();
         message.setUser(user);
         message.setChannel(channel);
@@ -73,11 +73,11 @@ final class RepositoryTestFixtures {
         return message;
     }
 
-    static LocalDateTime baseTime() {
+    public static LocalDateTime baseTime() {
         return BASE_TIME;
     }
 
-    static LocalDateTime timeAfterMinutes(int minutes) {
+    public static LocalDateTime timeAfterMinutes(int minutes) {
         return BASE_TIME.plusMinutes(minutes);
     }
 

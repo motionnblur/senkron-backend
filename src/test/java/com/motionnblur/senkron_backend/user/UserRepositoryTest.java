@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.repository;
+package com.motionnblur.senkron_backend.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,8 +12,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.motionnblur.senkron_backend.user.UserEntity;
-import com.motionnblur.senkron_backend.user.UserRepository;
+import com.motionnblur.senkron_backend.support.RepositoryTestFixtures;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)

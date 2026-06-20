@@ -1,4 +1,4 @@
-package com.motionnblur.senkron_backend.security;
+package com.motionnblur.senkron_backend.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,7 +7,6 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 
-import com.motionnblur.senkron_backend.auth.CookieUtils;
 import com.motionnblur.senkron_backend.config.AppProperties;
 
 class CookieUtilsTest {
