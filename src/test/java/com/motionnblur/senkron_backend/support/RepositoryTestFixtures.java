@@ -2,11 +2,11 @@ package com.motionnblur.senkron_backend.support;
 
 import java.time.LocalDateTime;
 
-import com.motionnblur.senkron_backend.channel.ChannelEntity;
-import com.motionnblur.senkron_backend.channel.ChannelMemberEntity;
-import com.motionnblur.senkron_backend.channel.ChannelType;
-import com.motionnblur.senkron_backend.message.MessageEntity;
-import com.motionnblur.senkron_backend.user.UserEntity;
+import com.motionnblur.senkron_backend.channel.domain.ChannelEntity;
+import com.motionnblur.senkron_backend.channel.domain.ChannelMemberEntity;
+import com.motionnblur.senkron_backend.channel.domain.ChannelType;
+import com.motionnblur.senkron_backend.message.domain.MessageEntity;
+import com.motionnblur.senkron_backend.user.domain.UserEntity;
 
 public final class RepositoryTestFixtures {
 

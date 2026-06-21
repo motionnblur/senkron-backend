@@ -35,10 +35,12 @@ it lives *inside* each feature package rather than in global `controller/`,
 Think of it as two axes:
 
 - **Vertical (feature):** `auth`, `user`, `channel`, `message` — top-level packages.
-- **Horizontal (layer):** within a feature, the usual layers (Controller, Service,
-  Repository, Entity, DTO).
+- **Horizontal (layer):** within a feature, consistent sub-packages:
+  `api`, `service`, `domain`, `repository`, `dto/request`, `dto/response`, `exception`.
+  Only create sub-packages that have files (e.g. `message` currently has `domain` + `repository` only).
 
-Truly cross-cutting infrastructure (security wiring, typed config) lives in `config`.
+Truly cross-cutting infrastructure lives in `config` with adapted sub-packages:
+`security`, `properties`, `web`.
 
 ### Why this style
 - High cohesion: everything about a feature is in one place.
@@ -62,42 +64,74 @@ com.motionnblur.senkron_backend
 ├── SenkronBackendApplication.java      # Spring Boot entry point (@SpringBootApplication)
 │
 ├── auth/                               # Authentication & security feature
-│   ├── AuthController.java             # REST: GET /auth/me, POST /auth/logout
-│   ├── AuthService.java               # find-or-create user, getUserById (@Transactional)
-│   ├── CustomOAuth2UserService.java   # loads Google user, provisions it in DB
-│   ├── OAuth2LoginSuccessHandler.java # issues JWT cookie + redirect after OAuth login
-│   ├── JwtService.java                # create/parse/verify JWT (HS256)
-│   ├── JwtAuthenticationFilter.java   # reads access_token cookie -> SecurityContext
-│   ├── JwtUserPrincipal.java          # authenticated principal (record: userId, email)
-│   ├── CookieUtils.java               # build/clear the access_token cookie
-│   └── GoogleUserProfile.java         # maps OAuth2 attributes (sub/email/name...)
+│   ├── api/
+│   │   └── AuthController.java         # REST: GET /auth/me, POST /auth/logout
+│   ├── service/
+│   │   ├── AuthService.java            # find-or-create user, getUserById (@Transactional)
+│   │   ├── CustomOAuth2UserService.java
+│   │   ├── OAuth2LoginSuccessHandler.java
+│   │   ├── JwtService.java
+│   │   ├── JwtAuthenticationFilter.java
+│   │   └── CookieUtils.java
+│   └── domain/
+│       ├── JwtUserPrincipal.java       # authenticated principal (cross-feature public API)
+│       └── GoogleUserProfile.java
 │
 ├── user/                               # User domain
-│   ├── UserEntity.java                # JPA entity -> table "users"
-│   ├── UserRepository.java            # Spring Data JPA repo
-│   ├── UserResponse.java              # response DTO (record) + from(entity) mapper
-│   └── UserNotFoundException.java     # thrown by AuthService.getUserById
+│   ├── domain/
+│   │   └── UserEntity.java             # JPA entity -> table "users"
+│   ├── repository/
+│   │   └── UserRepository.java
+│   ├── dto/response/
+│   │   └── UserResponse.java           # response DTO (record) + from(entity) mapper
+│   └── exception/
+│       └── UserNotFoundException.java
 │
 ├── channel/                            # Channel domain
-│   ├── ChannelController.java         # REST: POST /channels
-│   ├── ChannelService.java            # createChannel (@Transactional)
-│   ├── ChannelEntity.java             # -> table "channels"  (createdBy -> UserEntity)
-│   ├── ChannelMemberEntity.java       # -> table "channel_members" (unique user+channel)
-│   ├── ChannelRepository.java
-│   ├── ChannelMemberRepository.java
-│   ├── ChannelType.java               # enum: PUBLIC, PRIVATE, DM
-│   ├── CreateChannelRequest.java      # request DTO (record)
-│   └── ChannelResponse.java           # response DTO (record) + from(entity) mapper
+│   ├── api/
+│   │   └── ChannelController.java      # REST: POST /channels, join/leave/members
+│   ├── service/
+│   │   └── ChannelService.java
+│   ├── domain/
+│   │   ├── ChannelEntity.java
+│   │   ├── ChannelMemberEntity.java
+│   │   └── ChannelType.java            # enum: PUBLIC, PRIVATE, DM
+│   ├── repository/
+│   │   ├── ChannelRepository.java
+│   │   └── ChannelMemberRepository.java
+│   ├── dto/request/
+│   │   ├── CreateChannelRequest.java
+│   │   └── AddChannelMemberRequest.java
+│   ├── dto/response/
+│   │   └── ChannelResponse.java
+│   └── exception/
+│       ├── ChannelNotFoundException.java
+│       └── ChannelMemberNotFoundException.java
 │
-├── message/                            # Message domain
-│   ├── MessageEntity.java             # -> table "messages" (user + nullable channel)
-│   └── MessageRepository.java
+├── message/                            # Message domain (persistence only today)
+│   ├── domain/
+│   │   └── MessageEntity.java
+│   └── repository/
+│       └── MessageRepository.java
 │
 └── config/                             # Cross-cutting infrastructure
-    ├── SecurityConfig.java            # Spring Security filter chain, CORS, CSRF
-    ├── AppProperties.java             # typed config (@ConfigurationProperties "app")
-    └── AppConfig.java                 # @EnableConfigurationProperties(AppProperties)
+    ├── security/
+    │   └── SecurityConfig.java         # Spring Security filter chain, CORS, CSRF
+    ├── properties/
+    │   ├── AppProperties.java          # typed config (@ConfigurationProperties "app")
+    │   └── AppConfig.java
+    └── web/
+        └── GlobalExceptionHandler.java # @RestControllerAdvice -> ProblemDetail responses
 ```
+
+### Cross-feature public API (import these from other features)
+
+- `auth.domain.JwtUserPrincipal` — read authenticated user in controllers
+- `user.dto.response.UserResponse` — user HTTP responses
+- `user.domain.UserEntity`, `user.repository.UserRepository`, `user.exception.UserNotFoundException`
+- `channel.domain.*`, `channel.exception.*` — entity relations and error mapping
+- `auth.service.*` — wired by `SecurityConfig`
+- `config.properties.AppProperties` — typed app configuration
 
 ---
 
@@ -235,15 +269,24 @@ in three styles:
 Shared test data builders live in `support/RepositoryTestFixtures` (a `public`
 helper usable across feature test packages).
 
-Test layout:
+Test layout (mirrors main layer sub-packages):
 ```
 src/test/java/com/motionnblur/senkron_backend/
-├── auth/        # unit + integration tests for the auth feature
-├── user/        # UserRepositoryTest, UserResponseTest
-├── channel/     # ChannelServiceTest, ChannelControllerTest, repository tests
-├── message/     # MessageRepositoryTest
-├── support/     # RepositoryTestFixtures (shared)
-└── SenkronBackendApplicationTests.java  # context loads
+├── auth/
+│   ├── api/           AuthControllerTest
+│   ├── service/       AuthServiceTest, JwtServiceTest, CookieUtilsTest, ...
+│   └── domain/        GoogleUserProfileTest
+├── user/
+│   ├── repository/    UserRepositoryTest
+│   └── dto/response/  UserResponseTest
+├── channel/
+│   ├── api/           ChannelControllerTest
+│   ├── service/       ChannelServiceTest
+│   └── repository/    ChannelRepositoryTest, ChannelMemberRepositoryTest
+├── message/
+│   └── repository/    MessageRepositoryTest
+├── support/           RepositoryTestFixtures (shared)
+└── SenkronBackendApplicationTests.java
 ```
 
 Run tests: `./mvnw test` · Compile only: `./mvnw clean test-compile`
@@ -252,16 +295,18 @@ Run tests: `./mvnw test` · Compile only: `./mvnw clean test-compile`
 
 ## 9. Conventions (follow these when extending)
 
-- **New feature** → new top-level package (e.g. `channel`) holding its controller,
-  service, repository, entity, and DTOs.
-- **Layering inside a feature:** Controller (web) → Service (business logic,
-  `@Transactional` where state changes) → Repository (Spring Data JPA) → Entity.
+- **New feature** → new top-level package with layer sub-packages:
+  `api`, `service`, `domain`, `repository`, `dto/request`, `dto/response`, `exception`
+  (create only the layers you need).
+- **Layering inside a feature:** `api` → `service` → `repository` → `domain`;
+  HTTP DTOs live under `dto/` and must not expose entities directly.
 - **Never expose entities over HTTP.** Add a response DTO (record) with a static
-  `from(entity)` mapper, like `UserResponse`.
-- **Read the authenticated user** with `@AuthenticationPrincipal JwtUserPrincipal`.
-- **Config:** add typed fields to `AppProperties` instead of using raw `@Value`.
-- **Cross-feature use** is via explicit imports (e.g. a `channel` service importing
-  `user.UserRepository`). Keep genuinely shared infra in `config`.
+  `from(entity)` mapper under `dto/response`, like `UserResponse`.
+- **Read the authenticated user** with `@AuthenticationPrincipal JwtUserPrincipal`
+  (from `auth.domain`).
+- **Config:** add typed fields to `config.properties.AppProperties` instead of raw `@Value`.
+- **Cross-feature use** is via explicit imports (e.g. `channel.service` importing
+  `user.repository.UserRepository`). Keep genuinely shared infra in `config`.
 - **Constructor injection** everywhere (no field injection).
 
 ---
@@ -270,10 +315,10 @@ Run tests: `./mvnw test` · Compile only: `./mvnw clean test-compile`
 
 These are intentional and not yet implemented:
 
-- **Channel APIs beyond creation:** list channels, join/leave, DM creation, membership authorization.
+- **Channel APIs beyond creation:** list channels, DM creation.
 - **Message business layer:** no service or controller yet (persistence only).
-- **Global exception handling:** no `@RestControllerAdvice`; `UserNotFoundException`
-  and `IllegalArgumentException` are thrown but there is no central HTTP error mapping (e.g. → 404/400).
+- **Global exception handling:** `config.web.GlobalExceptionHandler` maps domain
+  not-found exceptions to `404`, validation errors to `400`, and state violations to `403`.
 - **Workspace model:** channels are not scoped to a team/workspace yet.
 - **Refresh tokens:** only a single access-token JWT cookie exists today.
 - **Real-time messaging:** no WebSocket/STOMP transport yet.
