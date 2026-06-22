@@ -187,7 +187,7 @@ class ChannelControllerTest {
 
     @Test
     void addMember_returnsUnauthorizedWithoutCookie() throws Exception {
-        mockMvc.perform(post("/channels/1/members")
+        mockMvc.perform(post("/channels/1/add-member")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -202,7 +202,7 @@ class ChannelControllerTest {
         seedMember(user, channel);
         UserEntity joiner = userRepository.save(buildJoinerUser());
 
-        mockMvc.perform(post("/channels/{channelId}/members", channel.getId())
+        mockMvc.perform(post("/channels/{channelId}/add-member", channel.getId())
                         .with(csrf())
                         .cookie(accessTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -224,7 +224,7 @@ class ChannelControllerTest {
         seedMember(joiner, channel);
         Cookie joinerCookie = cookieFor(joiner);
 
-        mockMvc.perform(post("/channels/{channelId}/members", channel.getId())
+        mockMvc.perform(post("/channels/{channelId}/add-member", channel.getId())
                         .with(csrf())
                         .cookie(joinerCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -244,7 +244,7 @@ class ChannelControllerTest {
         UserEntity joiner = userRepository.save(buildJoinerUser());
         seedMember(joiner, channel);
 
-        mockMvc.perform(post("/channels/{channelId}/members", channel.getId())
+        mockMvc.perform(post("/channels/{channelId}/add-member", channel.getId())
                         .with(csrf())
                         .cookie(accessTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -263,7 +263,7 @@ class ChannelControllerTest {
         UserEntity nonMember = userRepository.save(buildJoinerUser());
         Cookie nonMemberCookie = cookieFor(nonMember);
 
-        mockMvc.perform(post("/channels/{channelId}/members", channel.getId())
+        mockMvc.perform(post("/channels/{channelId}/add-member", channel.getId())
                         .with(csrf())
                         .cookie(nonMemberCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -281,7 +281,7 @@ class ChannelControllerTest {
         seedMember(user, channel);
         UserEntity joiner = userRepository.save(buildJoinerUser());
 
-        mockMvc.perform(post("/channels/{channelId}/members", channel.getId())
+        mockMvc.perform(post("/channels/{channelId}/add-member", channel.getId())
                         .with(csrf())
                         .cookie(accessTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -297,7 +297,7 @@ class ChannelControllerTest {
     void addMember_returnsNotFoundWhenChannelMissing() throws Exception {
         UserEntity joiner = userRepository.save(buildJoinerUser());
 
-        mockMvc.perform(post("/channels/{channelId}/members", 999L)
+        mockMvc.perform(post("/channels/{channelId}/add-member", 999L)
                         .with(csrf())
                         .cookie(accessTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -314,7 +314,7 @@ class ChannelControllerTest {
         ChannelEntity channel = saveChannel(user, ChannelType.PRIVATE);
         seedMember(user, channel);
 
-        mockMvc.perform(post("/channels/{channelId}/members", channel.getId())
+        mockMvc.perform(post("/channels/{channelId}/add-member", channel.getId())
                         .with(csrf())
                         .cookie(accessTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON)

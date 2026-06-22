@@ -51,7 +51,7 @@ public class ChannelController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{channelId}/members")
+    @PostMapping("/{channelId}/add-member")
     public ResponseEntity<Void> addMember(
             @AuthenticationPrincipal JwtUserPrincipal principal,
             @PathVariable Long channelId,
