@@ -2,6 +2,7 @@ package com.motionnblur.senkron_backend.message.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -153,6 +154,53 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.detail").value("Channel not found: 999"));
     }
 
+    @Test
+    void listMessages_returnsUnauthorizedWithoutCookie() throws Exception {
+        mockMvc.perform(get("/channels/1/messages"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void listMessages_returnsPagedMessagesForMember() throws Exception {
+        ChannelEntity channel = saveChannel(user, ChannelType.PUBLIC);
+        seedMember(user, channel);
+        seedMessage(user, channel, "first", LocalDateTime.of(2026, 1, 15, 10, 0));
+        seedMessage(user, channel, "second", LocalDateTime.of(2026, 1, 15, 10, 5));
+        seedMessage(user, channel, "third", LocalDateTime.of(2026, 1, 15, 10, 10));
+
+        mockMvc.perform(get("/channels/{channelId}/messages", channel.getId())
+                        .param("page", "0")
+                        .param("size", "2")
+                        .cookie(accessTokenCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content[0].content").value("third"))
+                .andExpect(jsonPath("$.content[0].authorDisplayName").value("Ada Lovelace"));
+    }
+
+    @Test
+    void listMessages_returnsForbiddenWhenNotMember() throws Exception {
+        ChannelEntity channel = saveChannel(user, ChannelType.PUBLIC);
+        UserEntity nonMember = userRepository.save(buildJoinerUser());
+        Cookie nonMemberCookie = cookieFor(nonMember);
+
+        mockMvc.perform(get("/channels/{channelId}/messages", channel.getId())
+                        .cookie(nonMemberCookie))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.detail").value("Only channel members can read messages"));
+    }
+
+    @Test
+    void listMessages_returnsNotFoundWhenChannelMissing() throws Exception {
+        mockMvc.perform(get("/channels/{channelId}/messages", 999L)
+                        .cookie(accessTokenCookie))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value("Channel not found: 999"));
+    }
+
     private Cookie cookieFor(UserEntity authenticatedUser) {
         String token = jwtService.generateToken(authenticatedUser.getId(), authenticatedUser.getEmail());
         return new Cookie(CookieUtils.ACCESS_TOKEN_COOKIE, token);
@@ -164,6 +212,15 @@ class MessageControllerTest {
         membership.setChannel(channel);
         membership.setJoinedAt(LocalDateTime.of(2026, 1, 16, 10, 0));
         channelMemberRepository.save(membership);
+    }
+
+    private void seedMessage(UserEntity author, ChannelEntity channel, String content, LocalDateTime createdAt) {
+        MessageEntity message = new MessageEntity();
+        message.setUser(author);
+        message.setChannel(channel);
+        message.setContent(content);
+        message.setCreatedAt(createdAt);
+        messageRepository.save(message);
     }
 
     private UserEntity buildUser() {

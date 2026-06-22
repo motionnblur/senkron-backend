@@ -2,6 +2,8 @@ package com.motionnblur.senkron_backend.message.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,19 @@ public class MessageService {
 
         MessageEntity saved = messageRepository.save(message);
         return MessageResponse.from(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MessageResponse> listMessages(Long userId, Long channelId, Pageable pageable) {
+        if (!channelRepository.existsById(channelId)) {
+            throw new ChannelNotFoundException(channelId);
+        }
+        if (!channelMemberRepository.existsByUserIdAndChannelId(userId, channelId)) {
+            throw new IllegalStateException("Only channel members can read messages");
+        }
+
+        return messageRepository.findByChannelIdOrderByCreatedAtDesc(channelId, pageable)
+                .map(MessageResponse::from);
     }
 
     private void validateContent(SendMessageRequest request) {

@@ -3,11 +3,13 @@ package com.motionnblur.senkron_backend.message.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.motionnblur.senkron_backend.channel.domain.ChannelEntity;
 import com.motionnblur.senkron_backend.channel.domain.ChannelType;
@@ -152,6 +159,82 @@ class MessageServiceTest {
                 .hasMessage("Only channel members can send messages");
 
         verify(messageRepository, never()).save(any(MessageEntity.class));
+    }
+
+    @Test
+    void listMessages_returnsPagedResponsesNewestFirst() {
+        UserEntity author = user(1L, "ada@example.com");
+        ChannelEntity channel = channel(10L, "general", ChannelType.PUBLIC);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        MessageEntity newest = message(103L, author, channel, "third", LocalDateTime.of(2026, 1, 15, 10, 10));
+        MessageEntity middle = message(102L, author, channel, "second", LocalDateTime.of(2026, 1, 15, 10, 5));
+        Page<MessageEntity> page = new PageImpl<>(List.of(newest, middle), pageable, 3);
+
+        when(channelRepository.existsById(10L)).thenReturn(true);
+        when(channelMemberRepository.existsByUserIdAndChannelId(1L, 10L)).thenReturn(true);
+        when(messageRepository.findByChannelIdOrderByCreatedAtDesc(10L, pageable)).thenReturn(page);
+
+        Page<MessageResponse> result = messageService.listMessages(1L, 10L, pageable);
+
+        assertThat(result.getContent()).extracting(MessageResponse::content)
+                .containsExactly("third", "second");
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent().get(0).authorDisplayName()).isEqualTo("Ada Lovelace");
+        verify(messageRepository).findByChannelIdOrderByCreatedAtDesc(10L, pageable);
+    }
+
+    @Test
+    void listMessages_returnsEmptyPageWhenNoMessages() {
+        Pageable pageable = PageRequest.of(0, 50, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<MessageEntity> emptyPage = Page.empty(pageable);
+
+        when(channelRepository.existsById(10L)).thenReturn(true);
+        when(channelMemberRepository.existsByUserIdAndChannelId(1L, 10L)).thenReturn(true);
+        when(messageRepository.findByChannelIdOrderByCreatedAtDesc(10L, pageable)).thenReturn(emptyPage);
+
+        Page<MessageResponse> result = messageService.listMessages(1L, 10L, pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isZero();
+    }
+
+    @Test
+    void listMessages_throwsWhenChannelNotFound() {
+        Pageable pageable = PageRequest.of(0, 50);
+
+        when(channelRepository.existsById(99L)).thenReturn(false);
+
+        assertThatThrownBy(() -> messageService.listMessages(1L, 99L, pageable))
+                .isInstanceOf(ChannelNotFoundException.class)
+                .hasMessage("Channel not found: 99");
+
+        verify(messageRepository, never()).findByChannelIdOrderByCreatedAtDesc(eq(99L), any(Pageable.class));
+    }
+
+    @Test
+    void listMessages_throwsWhenNotMember() {
+        Pageable pageable = PageRequest.of(0, 50);
+
+        when(channelRepository.existsById(10L)).thenReturn(true);
+        when(channelMemberRepository.existsByUserIdAndChannelId(1L, 10L)).thenReturn(false);
+
+        assertThatThrownBy(() -> messageService.listMessages(1L, 10L, pageable))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Only channel members can read messages");
+
+        verify(messageRepository, never()).findByChannelIdOrderByCreatedAtDesc(eq(10L), any(Pageable.class));
+    }
+
+    private MessageEntity message(
+            Long id, UserEntity author, ChannelEntity channel, String content, LocalDateTime createdAt) {
+        MessageEntity message = new MessageEntity();
+        message.setId(id);
+        message.setUser(author);
+        message.setChannel(channel);
+        message.setContent(content);
+        message.setCreatedAt(createdAt);
+        return message;
     }
 
     private UserEntity user(Long id, String email) {
