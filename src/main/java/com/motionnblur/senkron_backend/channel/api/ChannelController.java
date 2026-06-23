@@ -1,8 +1,11 @@
 package com.motionnblur.senkron_backend.channel.api;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,6 +61,16 @@ public class ChannelController {
             @RequestBody AddChannelMemberRequest request) {
         channelService.addMember(principal.userId(), channelId, request.userId());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ChannelResponse>> getMyChannels(
+            @AuthenticationPrincipal JwtUserPrincipal principal) {
+        List<ChannelEntity> channels = channelService.getUserChannels(principal.userId());
+        List<ChannelResponse> responses = channels.stream()
+                .map(ChannelResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
 }

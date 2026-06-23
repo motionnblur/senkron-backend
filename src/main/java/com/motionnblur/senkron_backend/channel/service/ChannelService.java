@@ -1,6 +1,7 @@
 package com.motionnblur.senkron_backend.channel.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,6 +135,14 @@ public class ChannelService {
                 .orElseThrow(() -> new ChannelMemberNotFoundException(userId, channelId));
 
         channelMemberRepository.delete(membership);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChannelEntity> getUserChannels(Long userId) {
+        return channelMemberRepository.findByUserId(userId)
+                .stream()
+                .map(ChannelMemberEntity::getChannel)
+                .toList();
     }
 
 }
