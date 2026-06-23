@@ -1,7 +1,9 @@
 package com.motionnblur.senkron_backend.channel.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -352,6 +354,79 @@ class ChannelControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.detail").value("Channel not found: 999"));
+    }
+
+    @Test
+    void getMyChannels_returnsUnauthorizedWithoutCookie() throws Exception {
+        mockMvc.perform(get("/channels")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getMyChannels_returnsUserChannels() throws Exception {
+        ChannelEntity channel1 = saveChannel(user, ChannelType.PUBLIC);
+        ChannelEntity channel2 = saveChannel(user, ChannelType.PRIVATE);
+        seedMember(user, channel1);
+        seedMember(user, channel2);
+
+        mockMvc.perform(get("/channels")
+                        .with(csrf())
+                        .cookie(accessTokenCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(channel1.getId().intValue()))
+                .andExpect(jsonPath("$[0].name").value(channel1.getName()))
+                .andExpect(jsonPath("$[0].description").value(channel1.getDescription()))
+                .andExpect(jsonPath("$[0].type").value(channel1.getType().name()))
+                .andExpect(jsonPath("$[0].createdById").value(channel1.getCreatedBy().getId().intValue()))
+                .andExpect(jsonPath("$[0].createdAt").exists())
+                .andExpect(jsonPath("$[1].id").value(channel2.getId().intValue()))
+                .andExpect(jsonPath("$[1].name").value(channel2.getName()))
+                .andExpect(jsonPath("$[1].type").value(channel2.getType().name()));
+    }
+
+    @Test
+    void getMyChannels_returnsEmptyListWhenNoChannels() throws Exception {
+        mockMvc.perform(get("/channels")
+                        .with(csrf())
+                        .cookie(accessTokenCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void getMyChannels_returnsOnlyUsersChannels() throws Exception {
+        ChannelEntity userChannel = saveChannel(user, ChannelType.PUBLIC);
+        seedMember(user, userChannel);
+
+        UserEntity otherUser = userRepository.save(buildJoinerUser());
+        saveChannel(otherUser, ChannelType.PUBLIC);
+
+        mockMvc.perform(get("/channels")
+                        .with(csrf())
+                        .cookie(accessTokenCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(userChannel.getId().intValue()))
+                .andExpect(jsonPath("$[0].name").value(userChannel.getName()));
+    }
+
+    @Test
+    void getMyChannels_returnsChannelWhenUserIsOnlyMemberNotCreator() throws Exception {
+        ChannelEntity channel = saveChannel(user, ChannelType.PUBLIC);
+        UserEntity joiner = userRepository.save(buildJoinerUser());
+        seedMember(joiner, channel);
+        Cookie joinerCookie = cookieFor(joiner);
+
+        mockMvc.perform(get("/channels")
+                        .with(csrf())
+                        .cookie(joinerCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(channel.getId().intValue()))
+                .andExpect(jsonPath("$[0].name").value(channel.getName()))
+                .andExpect(jsonPath("$[0].createdById").isNumber());
     }
 
     private Cookie cookieFor(UserEntity authenticatedUser) {

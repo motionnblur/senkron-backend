@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -319,6 +320,63 @@ class ChannelServiceTest {
         assertThatThrownBy(() -> channelService.addMember(1L, 10L, 99L))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("User not found: 99");
+    }
+
+    @Test
+    void getUserChannels_returnsChannelsForUser() {
+        UserEntity user = user(1L, "ada@example.com");
+        ChannelEntity channel1 = channel(10L, "general", ChannelType.PUBLIC);
+        ChannelEntity channel2 = channel(11L, "team", ChannelType.PRIVATE);
+
+        ChannelMemberEntity member1 = new ChannelMemberEntity();
+        member1.setUser(user);
+        member1.setChannel(channel1);
+
+        ChannelMemberEntity member2 = new ChannelMemberEntity();
+        member2.setUser(user);
+        member2.setChannel(channel2);
+
+        when(channelMemberRepository.findByUserId(1L)).thenReturn(List.of(member1, member2));
+
+        List<ChannelEntity> result = channelService.getUserChannels(1L);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactly(channel1, channel2);
+    }
+
+    @Test
+    void getUserChannels_returnsEmptyListWhenUserHasNoChannels() {
+        when(channelMemberRepository.findByUserId(1L)).thenReturn(List.of());
+
+        List<ChannelEntity> result = channelService.getUserChannels(1L);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getUserChannels_returnsSingleChannelWhenUserHasOneMembership() {
+        UserEntity user = user(1L, "ada@example.com");
+        ChannelEntity channel = channel(10L, "general", ChannelType.PUBLIC);
+
+        ChannelMemberEntity member = new ChannelMemberEntity();
+        member.setUser(user);
+        member.setChannel(channel);
+
+        when(channelMemberRepository.findByUserId(1L)).thenReturn(List.of(member));
+
+        List<ChannelEntity> result = channelService.getUserChannels(1L);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isSameAs(channel);
+    }
+
+    @Test
+    void getUserChannels_handlesNonExistentUserIdGracefully() {
+        when(channelMemberRepository.findByUserId(999L)).thenReturn(List.of());
+
+        List<ChannelEntity> result = channelService.getUserChannels(999L);
+
+        assertThat(result).isEmpty();
     }
 
     private UserEntity user(Long id, String email) {
