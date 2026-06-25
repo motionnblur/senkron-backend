@@ -23,6 +23,9 @@ public class UserEntity {
     @Column(name = "display_name", nullable = false)
     private String displayName;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 

@@ -9,6 +9,7 @@ public record UserResponse(
         String name,
         String lastName,
         String displayName,
+        String title,
         String email,
         LocalDateTime createdAt
 ) {
@@ -19,6 +20,7 @@ public record UserResponse(
                 entity.getName(),
                 entity.getLastName(),
                 entity.getDisplayName(),
+                entity.getTitle(),
                 entity.getEmail(),
                 entity.getCreatedAt()
         );

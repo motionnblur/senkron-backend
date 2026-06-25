@@ -44,7 +44,7 @@ class UserServiceTest {
         user.setEmail("test@example.com");
         user.setCreatedAt(LocalDateTime.now());
 
-        UpdateProfileRequest request = new UpdateProfileRequest("NewName", "NewLastName", "NewDisplayName");
+        UpdateProfileRequest request = new UpdateProfileRequest("NewName", "NewLastName", "NewDisplayName", null);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -59,7 +59,7 @@ class UserServiceTest {
 
     @Test
     void updateProfile_throwsUserNotFoundExceptionWhenUserMissing() {
-        UpdateProfileRequest request = new UpdateProfileRequest("NewName", "NewLastName", "NewDisplayName");
+        UpdateProfileRequest request = new UpdateProfileRequest("NewName", "NewLastName", "NewDisplayName", null);
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.updateProfile(99L, request));
@@ -68,7 +68,7 @@ class UserServiceTest {
 
     @Test
     void updateProfile_throwsIllegalArgumentExceptionWhenNameIsBlank() {
-        UpdateProfileRequest request = new UpdateProfileRequest(" ", "LastName", "DisplayName");
+        UpdateProfileRequest request = new UpdateProfileRequest(" ", "LastName", "DisplayName", null);
 
         assertThrows(IllegalArgumentException.class, () -> userService.updateProfile(1L, request));
         verify(userRepository, never()).findById(any());
@@ -76,17 +76,29 @@ class UserServiceTest {
     }
 
     @Test
-    void updateProfile_throwsIllegalArgumentExceptionWhenLastNameIsBlank() {
-        UpdateProfileRequest request = new UpdateProfileRequest("Name", null, "DisplayName");
+    void updateProfile_allowsNullLastNameAndConvertsToEmptyString() {
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        user.setName("Name");
+        user.setLastName("OldLastName");
+        user.setDisplayName("DisplayName");
+        user.setEmail("test@example.com");
+        user.setCreatedAt(LocalDateTime.now());
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateProfile(1L, request));
-        verify(userRepository, never()).findById(any());
-        verify(userRepository, never()).save(any());
+        UpdateProfileRequest request = new UpdateProfileRequest("Name", null, "DisplayName", null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserEntity result = userService.updateProfile(1L, request);
+
+        assertThat(result.getLastName()).isEqualTo("");
+        verify(userRepository).save(user);
     }
 
     @Test
     void updateProfile_throwsIllegalArgumentExceptionWhenDisplayNameIsBlank() {
-        UpdateProfileRequest request = new UpdateProfileRequest("Name", "LastName", "");
+        UpdateProfileRequest request = new UpdateProfileRequest("Name", "LastName", "", null);
 
         assertThrows(IllegalArgumentException.class, () -> userService.updateProfile(1L, request));
         verify(userRepository, never()).findById(any());

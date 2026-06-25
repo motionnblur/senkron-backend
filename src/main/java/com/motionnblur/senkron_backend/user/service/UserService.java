@@ -25,8 +25,9 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.setName(request.name());
-        user.setLastName(request.lastName());
+        user.setLastName(request.lastName() == null ? "" : request.lastName());
         user.setDisplayName(request.displayName());
+        user.setTitle(request.title());
 
         return userRepository.save(user);
     }
@@ -34,9 +35,6 @@ public class UserService {
     private void validateRequest(UpdateProfileRequest request) {
         if (request.name() == null || request.name().isBlank()) {
             throw new IllegalArgumentException("Name must not be blank");
-        }
-        if (request.lastName() == null || request.lastName().isBlank()) {
-            throw new IllegalArgumentException("Last name must not be blank");
         }
         if (request.displayName() == null || request.displayName().isBlank()) {
             throw new IllegalArgumentException("Display name must not be blank");

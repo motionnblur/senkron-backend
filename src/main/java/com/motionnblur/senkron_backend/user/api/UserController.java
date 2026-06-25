@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.motionnblur.senkron_backend.auth.domain.JwtUserPrincipal;
+import com.motionnblur.senkron_backend.user.domain.UserEntity;
 import com.motionnblur.senkron_backend.user.dto.request.UpdateProfileRequest;
+import com.motionnblur.senkron_backend.user.dto.response.UserResponse;
 import com.motionnblur.senkron_backend.user.service.UserService;
 
 @RestController
@@ -22,11 +24,11 @@ public class UserController {
     }
 
     @PostMapping("/update-profile")
-    public ResponseEntity<Void> updateProfile(
+    public ResponseEntity<UserResponse> updateProfile(
             @AuthenticationPrincipal JwtUserPrincipal principal,
             @RequestBody UpdateProfileRequest request) {
-        userService.updateProfile(principal.userId(), request);
-        return ResponseEntity.ok().build();
+        UserEntity updated = userService.updateProfile(principal.userId(), request);
+        return ResponseEntity.ok(UserResponse.from(updated));
     }
 
 }
